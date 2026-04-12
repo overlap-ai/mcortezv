@@ -1,0 +1,263 @@
+import { useRef } from 'react'
+import { useGSAP } from '@gsap/react'
+import { gsap } from '@/lib/gsap'
+import { techStack } from '@/data/personal'
+import type { TechItem } from '@/types'
+
+/* ─── Grouped data ──────────────────────────────────────── */
+const AI_ML  = techStack.filter(t => t.category === 'AI/ML')
+const LANGS  = techStack.filter(t => t.category === 'Language')
+const FW     = techStack.filter(t => t.category === 'Framework')
+const DB     = techStack.filter(t => t.category === 'Database')
+const INFRA  = techStack.filter(t => t.category === 'Infrastructure')
+const TOOLS  = techStack.filter(t => t.category === 'Tool')
+
+/* ─── Logo URLs ──────────────────────────────────────────── */
+const LOGOS: Record<string, string> = {
+  'Python':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+  'TypeScript':  'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+  'Java':        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
+  'React':       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+  'PostgreSQL':  'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+  'Supabase':    'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg',
+  'SQL':         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg',
+  'Git':         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
+  'GitHub':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',
+  'Vercel':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg',
+  'LangChain':   'https://registry.npmmirror.com/@lobehub/icons-static-png/1.24.0/files/dark/langchain-color.png',
+  'LangSmith':   'https://registry.npmmirror.com/@lobehub/icons-static-png/1.24.0/files/dark/langchain-color.png',
+  'Scikit-Learn':'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/scikitlearn/scikitlearn-original.svg',
+  'Railway':     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/railway/railway-original.svg',
+}
+
+/* ─── Mastra inline SVG logo ─── */
+const MastraLogo = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 34 21" className={className}>
+    <path fill="currentColor" d="M4.5 11.7a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9M10.4 0a4.5 4.5 0 0 1 4.4 5.5c-.3 1.4-.6 3 .2 4.2l1.3 1.8.3.2q.2 0 .3-.2l1.3-1.9c.8-1.1.5-2.7.2-4a4.5 4.5 0 1 1 8.8 0c-.3 1.3-.6 2.8 0 4l1.3 2a4.5 4.5 0 1 1-4.3 3.5c.3-1.3.6-2.8 0-4l-1.2-2h-.2L21.5 11c-.8 1.2-.5 2.8-.2 4.2a4.5 4.5 0 1 1-8.8.2q.5-2-.4-3.8l-.9-1.3q-.9-1.1-2.4-1.6A4.5 4.5 0 0 1 10.4 0"/>
+  </svg>
+)
+
+/* ─── Helpers ───────────────────────────────────────────── */
+const levelWidth = (l: TechItem['level']) => l === 'core' ? '100%' : l === 'proficient' ? '66%' : '33%'
+
+const LevelBar = ({ level, color }: { level: TechItem['level']; color: string }) => (
+  <div className="w-8 h-1 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'var(--border-medium)' }}>
+    <div className="h-full rounded-full" style={{ width: levelWidth(level), background: color, opacity: 0.7 }} />
+  </div>
+)
+
+const CellLabel = ({ text, color }: { text: string; color: string }) => (
+  <span
+    className="font-mono text-[0.6rem] tracking-[0.14em] uppercase mb-4 inline-block"
+    style={{ color }}
+  >
+    {text}
+  </span>
+)
+
+const Logo = ({ name }: { name: string }) => {
+  if (name === 'Mastra') return <MastraLogo className="w-5 h-5 flex-shrink-0 text-[var(--accent)]" />
+  const url = LOGOS[name]
+  if (!url) return null
+  return (
+    <img
+      src={url}
+      alt={`${name} logo`}
+      className="w-5 h-5 flex-shrink-0 object-contain"
+      loading="lazy"
+      style={{ filter: name === 'GitHub' || name === 'Vercel' ? 'invert(1)' : undefined }}
+    />
+  )
+}
+
+/* ─── In-cell visualizations ─────────────────────────────── */
+const AIPipelineViz = () => (
+  <div className="mt-3 mb-5">
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {AI_ML.filter(t => t.level === 'core').map((t, i, arr) => (
+        <div key={t.name} className="flex items-center gap-1.5">
+          <span
+            className="inline-flex items-center gap-1 sm:gap-1.5 font-mono text-[0.6rem] sm:text-[0.68rem] font-semibold px-1.5 sm:px-2 py-0.5 rounded"
+            style={{ background: 'rgba(34,211,165,0.12)', color: '#22d3a5', border: '1px solid rgba(34,211,165,0.2)' }}
+          >
+            <span className="hidden sm:inline-flex"><Logo name={t.name} /></span>
+            {t.name}
+          </span>
+          {i < arr.length - 1 && (
+            <span className="text-[var(--text-disabled)] text-[0.6rem]">→</span>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
+export default function Stack() {
+  const containerRef = useRef<HTMLElement>(null)
+
+  useGSAP(() => {
+    gsap.from('.stack-label-h, .stack-title-h', {
+      scrollTrigger: { trigger: containerRef.current, start: 'top 80%' },
+      y: 30, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
+    })
+    gsap.from('.stack-cell', {
+      scrollTrigger: { trigger: '.stack-bento', start: 'top 82%' },
+      y: 30, opacity: 0, stagger: 0.07, duration: 0.55, ease: 'power3.out', delay: 0.2,
+    })
+  }, { scope: containerRef })
+
+  return (
+    <section id="stack" ref={containerRef} className="section bg-[var(--bg-surface)]">
+      <div className="max-w-[1280px] mx-auto">
+
+        <div className="stack-label-h section-label">Tech Stack</div>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <h2 className="stack-title-h text-h1 max-w-md">
+            Tools I use to{' '}
+            <span className="text-gradient-accent">ship fast</span>
+          </h2>
+          <p className="text-body text-[var(--text-muted)] max-w-sm md:text-right">
+            From Python ML pipelines to TypeScript AI agents — a full-stack approach to
+            building intelligent products.
+          </p>
+        </div>
+
+        {/* ── Hairline bento grid ── */}
+        <div
+          className="stack-bento rounded-2xl overflow-hidden"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '1px',
+            background: 'var(--border-medium)',
+          }}
+        >
+          {/* AI/ML — 2 cols */}
+          <div className="stack-cell flex flex-col p-6 md:p-8 min-h-[220px]" style={{ gridColumn: '1 / 3', background: 'var(--bg-card)' }}>
+            <CellLabel text="AI / ML Stack" color="#22d3a5" />
+            <AIPipelineViz />
+            <div className="space-y-2.5 mt-auto">
+              {AI_ML.map(t => (
+                <div key={t.name} className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Logo name={t.name} />
+                    <div className="min-w-0">
+                      <span className="text-xs font-semibold text-[var(--text)]">{t.name}</span>
+                      <span className="text-[var(--text-disabled)] mx-1.5 text-xs">·</span>
+                      <span className="text-[0.68rem] text-[var(--text-muted)]">{t.description}</span>
+                    </div>
+                  </div>
+                  <LevelBar level={t.level} color="#22d3a5" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Languages */}
+          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+            <CellLabel text="Languages" color="#22d3a5" />
+            <div className="space-y-4 mt-auto">
+              {LANGS.map(t => (
+                <div key={t.name}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Logo name={t.name} />
+                      <span className="text-sm font-bold text-[var(--text)]">{t.name}</span>
+                    </div>
+                    <LevelBar level={t.level} color="#22d3a5" />
+                  </div>
+                  <p className="text-[0.68rem] text-[var(--text-muted)] leading-snug pl-7">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Framework */}
+          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+            <CellLabel text="Framework" color="#8b5cf6" />
+            {FW.map(t => (
+              <div key={t.name} className="mt-auto">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <Logo name={t.name} />
+                    <span className="text-2xl font-bold" style={{ color: '#8b5cf6' }}>{t.name}</span>
+                  </div>
+                  <LevelBar level={t.level} color="#8b5cf6" />
+                </div>
+                <p className="text-[0.68rem] text-[var(--text-muted)]">{t.description}</p>
+                <div className="mt-4 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(139,92,246,0.12)' }}>
+                  <div className="h-full rounded-full" style={{ width: '95%', background: 'rgba(139,92,246,0.6)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Database — 2 cols */}
+          <div className="stack-cell flex flex-col p-6 md:p-8 min-h-[180px]" style={{ gridColumn: '1 / 3', background: 'var(--bg-card)' }}>
+            <CellLabel text="Database" color="#3b82f6" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-auto">
+              {DB.map(t => (
+                <div key={t.name} className="p-3 rounded-lg flex flex-col gap-2" style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.14)' }}>
+                  <div className="flex items-center gap-2">
+                    <Logo name={t.name} />
+                    <span className="text-sm font-bold text-[var(--text)] leading-tight">{t.name}</span>
+                  </div>
+                  <p className="text-[0.63rem] text-[var(--text-muted)] leading-snug">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Infrastructure */}
+          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+            <CellLabel text="Infrastructure" color="#f97316" />
+            <div className="space-y-3 mt-auto">
+              {INFRA.map(t => (
+                <div key={t.name}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="flex items-center gap-2">
+                      <Logo name={t.name} />
+                      <span className="text-sm font-bold text-[var(--text)]">{t.name}</span>
+                    </div>
+                    <LevelBar level={t.level} color="#f97316" />
+                  </div>
+                  <p className="text-[0.68rem] text-[var(--text-muted)] pl-7">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tools */}
+          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+            <CellLabel text="Tools" color="var(--text-muted)" />
+            <div className="space-y-3 mt-auto">
+              {TOOLS.map(t => (
+                <div key={t.name}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="flex items-center gap-2">
+                      <Logo name={t.name} />
+                      <span className="text-sm font-bold text-[var(--text)]">{t.name}</span>
+                    </div>
+                    <LevelBar level={t.level} color="var(--text-muted)" />
+                  </div>
+                  <p className="text-[0.68rem] text-[var(--text-muted)] pl-7">{t.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @media (max-width: 640px) {
+            .stack-bento {
+              grid-template-columns: 1fr !important;
+            }
+            .stack-bento > * {
+              grid-column: auto !important;
+            }
+          }
+        `}</style>
+      </div>
+    </section>
+  )
+}

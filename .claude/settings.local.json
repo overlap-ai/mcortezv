@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(npx vite:*)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s http://localhost:5174)",
+      "Bash(cmd /c \"rmdir /s /q \\\\\"C:\\\\Users\\\\mdjes\\\\Downloads\\\\mcortezv\\\\portfolio\\\\\"\")",
+      "Bash(powershell:*)"
+    ]
+  }
+}

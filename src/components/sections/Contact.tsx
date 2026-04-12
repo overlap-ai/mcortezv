@@ -1,0 +1,266 @@
+import { useRef } from 'react'
+import { useGSAP } from '@gsap/react'
+import { gsap } from '@/lib/gsap'
+import { personal } from '@/data/personal'
+
+const GitHubIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+  </svg>
+)
+const EmailIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+  </svg>
+)
+const LinkedInIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+  </svg>
+)
+
+export default function Contact() {
+  const containerRef = useRef<HTMLElement>(null)
+
+  useGSAP(() => {
+    gsap.from('.contact-label, .contact-title, .contact-sub', {
+      scrollTrigger: { trigger: containerRef.current, start: 'top 78%' },
+      y: 20, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
+    })
+  }, { scope: containerRef })
+
+  return (
+    <section id="contact" ref={containerRef} className="section bg-[var(--bg-surface)] relative overflow-hidden">
+      {/* Neon radial glow */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: 900, height: 900,
+          background: 'radial-gradient(circle, rgba(34,211,165,0.07) 0%, rgba(34,211,165,0.03) 25%, transparent 60%)',
+        }}
+      />
+
+      <div className="max-w-[1280px] mx-auto relative z-10">
+        <div className="contact-label section-label">Contact</div>
+
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="contact-title text-h1 mb-5">
+            Let's build something{' '}
+            <span className="text-gradient-accent">together</span>
+          </h2>
+          <p className="contact-sub text-body-lg text-[var(--text-secondary)]">
+            Have a project in mind? Let's talk about AI, automation, or anything interesting.
+          </p>
+        </div>
+
+        {/* ── Opus-style contact cards ── */}
+        <div className="cc-grid">
+          {/* GitHub */}
+          <a href={personal.links.github} target="_blank" rel="noopener noreferrer" className="cc-card">
+            <div className="cc-icon"><GitHubIcon /></div>
+            <div className="cc-info">
+              <span className="cc-label">GitHub</span>
+              <span className="cc-value">mcortezv</span>
+            </div>
+            <span className="cc-arrow">→</span>
+          </a>
+
+          {/* Email */}
+          <a href={`mailto:${personal.email.personal}`} className="cc-card cc-card--email">
+            <div className="cc-icon"><EmailIcon /></div>
+            <div className="cc-info">
+              <span className="cc-label">Email</span>
+              <span className="cc-value">{personal.email.personal}</span>
+              <span className="cc-secondary">{personal.email.work}</span>
+            </div>
+            <span className="cc-arrow">→</span>
+          </a>
+
+          {/* LinkedIn */}
+          <a href={personal.links.linkedin} target="_blank" rel="noopener noreferrer" className="cc-card">
+            <div className="cc-icon cc-icon--blue"><LinkedInIcon /></div>
+            <div className="cc-info">
+              <span className="cc-label">LinkedIn</span>
+              <span className="cc-value cc-value--blue">mcortezv</span>
+            </div>
+            <span className="cc-arrow">→</span>
+          </a>
+        </div>
+
+        {/* CTA */}
+        <div className="flex justify-center mb-10 mt-10">
+          <a
+            href={`mailto:${personal.email.personal}`}
+            className="btn-primary text-base px-8 py-3.5 rounded-full hover:shadow-[0_8px_32px_rgba(34,211,165,0.3),0_0_60px_rgba(34,211,165,0.15)]"
+          >
+            Send me an email
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </a>
+        </div>
+
+        <div className="flex items-center justify-center gap-2.5">
+          <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse-dot" />
+          <span className="text-small text-[var(--text-secondary)]">
+            Currently available for part-time consulting & AI projects.
+          </span>
+        </div>
+      </div>
+
+      {/* ── Opus-style CSS ── */}
+      <style>{`
+        .cc-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+
+        .cc-card {
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-lg);
+          backdrop-filter: blur(20px);
+          padding: 1.5rem;
+          text-decoration: none;
+          color: inherit;
+          overflow: hidden;
+          cursor: pointer;
+          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .cc-card:hover {
+          background: var(--bg-card-hover);
+          border-color: rgba(34, 211, 165, 0.2);
+          transform: translateY(-6px);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(34,211,165,0.08);
+        }
+
+        /* Grid pattern on hover */
+        .cc-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+          background-size: 20px 20px;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.25s ease;
+        }
+        .cc-card:hover::before { opacity: 1; }
+
+        /* Corner glow on hover */
+        .cc-card::after {
+          content: '';
+          position: absolute;
+          top: -1px;
+          left: -1px;
+          width: 140px;
+          height: 140px;
+          background: radial-gradient(circle at top left, rgba(34,211,165,0.15) 0%, transparent 70%);
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.25s ease;
+          border-radius: var(--radius-lg) 0 0 0;
+        }
+        .cc-card:hover::after { opacity: 1; }
+
+        /* Icon container */
+        .cc-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 48px;
+          min-width: 48px;
+          border-radius: var(--radius-md);
+          background: rgba(34,211,165,0.08);
+          border: 1px solid rgba(34,211,165,0.18);
+          color: var(--accent);
+          position: relative;
+          z-index: 1;
+          transition: all 0.25s ease;
+        }
+        .cc-card:hover .cc-icon {
+          background: rgba(34,211,165,0.15);
+          box-shadow: 0 0 20px rgba(34,211,165,0.15);
+        }
+        .cc-icon--blue {
+          background: rgba(59,130,246,0.08);
+          border-color: rgba(59,130,246,0.18);
+          color: #3b82f6;
+        }
+        .cc-card:hover .cc-icon--blue {
+          background: rgba(59,130,246,0.15);
+          box-shadow: 0 0 20px rgba(59,130,246,0.15);
+        }
+
+        /* Info */
+        .cc-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.1rem;
+          flex: 1;
+          min-width: 0;
+          position: relative;
+          z-index: 1;
+        }
+        .cc-label {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.65rem;
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+        }
+        .cc-value {
+          font-size: 0.9375rem;
+          font-weight: 600;
+          color: var(--text);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .cc-value--blue { color: #3b82f6; }
+        .cc-secondary {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.65rem;
+          color: var(--text-muted);
+          letter-spacing: 0.02em;
+        }
+
+        /* Arrow */
+        .cc-arrow {
+          font-size: 1.125rem;
+          color: var(--text-muted);
+          position: relative;
+          z-index: 1;
+          flex-shrink: 0;
+          transition: all 0.25s ease;
+        }
+        .cc-card:hover .cc-arrow {
+          color: var(--accent);
+          transform: translateX(4px);
+        }
+
+        @media (max-width: 768px) {
+          .cc-grid {
+            grid-template-columns: 1fr;
+            max-width: 420px;
+          }
+          .cc-card { padding: 1.25rem; }
+        }
+      `}</style>
+    </section>
+  )
+}
