@@ -1,11 +1,23 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from '@/lib/gsap'
 
 export default function CustomCursor() {
   const dotRef  = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
+  const [isTouch, setIsTouch] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+  )
 
   useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)')
+    const onChange = (e: MediaQueryListEvent) => setIsTouch(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    if (isTouch) return
+
     const dot  = dotRef.current
     const ring = ringRef.current
     if (!dot || !ring) return
@@ -50,7 +62,9 @@ export default function CustomCursor() {
       })
       observer.disconnect()
     }
-  }, [])
+  }, [isTouch])
+
+  if (isTouch) return null
 
   return (
     <>
