@@ -147,8 +147,8 @@ export default function Research() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-[var(--border)] pt-4 mt-auto">
-              <div className="flex items-center gap-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-[var(--border)] pt-4 mt-auto">
+              <div className="flex items-center flex-wrap gap-x-4 gap-y-1">
                 <div>
                   <span className="text-sm font-bold text-[var(--text)]">{featured.citations}</span>
                   <span className="text-[0.68rem] text-[var(--text-muted)] ml-1">citations</span>
@@ -161,7 +161,7 @@ export default function Research() {
                   <span className="text-[0.68rem] text-[var(--text-muted)] font-mono">{featured.readingTime}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[var(--accent)]">
+              <div className="flex items-center gap-2 text-[var(--accent)] flex-shrink-0">
                 <span className="text-xs font-medium">Read paper</span>
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="group-hover:translate-x-0.5 transition-transform">
                   <path d="M1 6h10M5.5 1.5L10 6l-4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

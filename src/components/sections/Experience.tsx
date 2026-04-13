@@ -114,11 +114,11 @@ export default function Experience() {
               <p className="text-sm text-[var(--text-muted)] mt-3 leading-relaxed max-w-lg">{currentRole.description}</p>
             </div>
 
-            <div className="flex items-center gap-2 mt-6 relative z-10">
+            <div className="flex items-center flex-wrap gap-2 mt-6 relative z-10">
               <span className="w-2 h-2 rounded-full flex-shrink-0 relative" style={{ background: 'var(--accent)' }}>
                 <span className="absolute inset-[-3px] rounded-full animate-pulse-dot" style={{ background: 'var(--accent)', opacity: 0.4 }} />
               </span>
-              <span className="font-mono text-xs text-[var(--text-secondary)] tracking-wide">Active · Remote · ene. 2026 – Present</span>
+              <span className="font-mono text-[0.65rem] sm:text-xs text-[var(--text-secondary)] tracking-wide">Active · Remote · ene. 2026 – Present</span>
             </div>
           </div>
 

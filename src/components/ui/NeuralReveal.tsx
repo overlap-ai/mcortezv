@@ -53,10 +53,13 @@ export default function NeuralReveal({
 
     function init() {
       if (!canvas) return
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       W = canvas.offsetWidth
       H = canvas.offsetHeight
-      canvas.width = W
-      canvas.height = H
+      canvas.width = W * dpr
+      canvas.height = H * dpr
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.scale(dpr, dpr)
 
       dots = Array.from({ length: count }, () => {
         const edge = Math.random()

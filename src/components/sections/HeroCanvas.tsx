@@ -169,10 +169,13 @@ export default function HeroCanvas() {
     }
 
     const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       W = canvas.offsetWidth
       H = canvas.offsetHeight
-      canvas.width = W
-      canvas.height = H
+      canvas.width = W * dpr
+      canvas.height = H * dpr
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.scale(dpr, dpr)
       ctx.fillStyle = '#060606'
       ctx.fillRect(0, 0, W, H)
 
