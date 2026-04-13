@@ -1,6 +1,7 @@
 import { useRef, useState, useMemo } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
+import { gsap, addTilt3D } from '@/lib/gsap'
+import NeuralReveal from '@/components/ui/NeuralReveal'
 
 /* ─── Map dot positions ─── */
 const MAP_DOTS: { x: number; y: number; active?: boolean }[] = [
@@ -56,7 +57,6 @@ function curvedPath(x1: number, y1: number, x2: number, y2: number, w: number, h
   const by = (y2 / 100) * h
   const mx = (ax + bx) / 2
   const my = (ay + by) / 2
-  // offset the control point perpendicular to the line for a nice curve
   const dx = bx - ax
   const dy = by - ay
   const len = Math.sqrt(dx * dx + dy * dy)
@@ -191,24 +191,31 @@ export default function About() {
     const tl = gsap.timeline({
       scrollTrigger: { trigger: containerRef.current, start: 'top 75%' },
     })
-    tl.from('.about-label', { y: 20, opacity: 0, duration: 0.5, ease: 'power2.out' })
-    tl.from('.about-title', { y: 35, opacity: 0, duration: 0.7, ease: 'power3.out' }, '-=0.2')
+    tl.from('.about-label', { y: 25, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' })
+    tl.from('.about-title', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'smooth-out' }, '-=0.3')
 
+    // ── Cards entrance ──
     const cards = gsap.utils.toArray<HTMLElement>('.about-card')
     cards.forEach((card, i) => {
-      const directions = [
-        { x: -60, y: 30 },
-        { x: 40, y: 40 },
-        { x: 0, y: 60 },
-      ]
-      const dir = directions[i] || { x: 0, y: 60 }
       gsap.from(card, {
-        x: dir.x, y: dir.y, opacity: 0,
-        duration: 1, delay: i * 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 90%' },
+        y: 50,
+        autoAlpha: 0,
+        duration: 0.9,
+        delay: i * 0.12,
+        ease: 'smooth-out',
+        scrollTrigger: { trigger: card, start: 'top 88%' },
       })
     })
 
+    // ── 3D tilt on cards for interactive depth ──
+    const tiltCleanups: (() => void)[] = []
+    if (window.innerWidth > 768) {
+      cards.forEach(card => {
+        tiltCleanups.push(addTilt3D(card, 8))
+      })
+    }
+
+    // ── Map dot breathing animation ──
     gsap.utils.toArray<HTMLElement>('.about-map-dot:not(.about-map-dot--active)').forEach((dot) => {
       gsap.to(dot, {
         opacity: Math.random() * 0.5 + 0.15,
@@ -217,11 +224,28 @@ export default function About() {
         delay: Math.random() * 2,
       })
     })
+
+    // ── Parallax on the about grid as you scroll past ──
+    gsap.to('.about-grid', {
+      y: -40,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1.5,
+      },
+    })
+
+    return () => {
+      tiltCleanups.forEach(fn => fn())
+    }
   }, { scope: containerRef })
 
   return (
-    <section id="about" ref={containerRef} className="section bg-[var(--bg-base)]">
-      <div className="max-w-[1280px] mx-auto">
+    <section id="about" ref={containerRef} className="section bg-[var(--bg-base)] relative overflow-hidden">
+      <NeuralReveal color={[34, 211, 165]} count={50} />
+      <div className="max-w-[1280px] mx-auto relative z-10">
 
         <div className="about-label section-label">About</div>
         <h2 className="about-title text-h1 mb-14 max-w-xl">
@@ -243,7 +267,7 @@ export default function About() {
         >
           {/* Bio Card (2-col) */}
           <div
-            className="about-card group relative p-7 md:p-8 overflow-hidden transition-all duration-300"
+            className="about-card tilt-card group relative p-7 md:p-8 overflow-hidden transition-all duration-300"
             style={{ gridColumn: 'span 2', background: 'var(--bg-card)' }}
           >
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
@@ -264,7 +288,7 @@ export default function About() {
 
           {/* Location Card */}
           <div
-            className="about-card group relative p-7 overflow-hidden transition-all duration-300"
+            className="about-card tilt-card group relative p-7 overflow-hidden transition-all duration-300"
             style={{ background: 'var(--bg-card)', minHeight: 200 }}
           >
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />

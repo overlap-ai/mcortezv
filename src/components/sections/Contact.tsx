@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
+import { gsap, SplitText, addMagneticEffect } from '@/lib/gsap'
 import { personal } from '@/data/personal'
+import NeuralReveal from '@/components/ui/NeuralReveal'
 
 const GitHubIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
@@ -21,12 +22,87 @@ const LinkedInIcon = () => (
 
 export default function Contact() {
   const containerRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
 
-  useGSAP(() => {
-    gsap.from('.contact-label, .contact-title, .contact-sub', {
+  useGSAP((_, contextSafe) => {
+    // ── Title with SplitText chars reveal — dramatic cinematic entrance ──
+    let split: SplitText | null = null
+    if (titleRef.current) {
+      split = SplitText.create(titleRef.current, { type: 'words,chars', mask: 'words' })
+    }
+
+    const headerTl = gsap.timeline({
       scrollTrigger: { trigger: containerRef.current, start: 'top 78%' },
-      y: 20, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
     })
+    headerTl.from('.contact-label', { y: 25, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' })
+    if (split) {
+      headerTl.from(split.chars, {
+        y: '200%',
+        scale: 1.5,
+        rotationX: -30,
+        stagger: 0.02,
+        duration: 1.2,
+        ease: 'smooth-out',
+      }, '-=0.3')
+    }
+    headerTl.from('.contact-sub', {
+      y: 30, autoAlpha: 0, duration: 0.8, ease: 'smooth-out',
+    }, '-=0.5')
+
+    // ── Contact cards staggered dramatic entrance ──
+    gsap.from('.cc-card', {
+      scrollTrigger: { trigger: '.cc-grid', start: 'top 85%' },
+      y: 80, scale: 0.85, opacity: 0,
+      stagger: 0.15,
+      duration: 1,
+      ease: 'back.out(1.2)',
+    })
+
+    // ── CTA button entrance ──
+    gsap.from('.contact-cta', {
+      scrollTrigger: { trigger: '.contact-cta', start: 'top 90%' },
+      y: 30, autoAlpha: 0, scale: 0.9,
+      duration: 0.8, ease: 'smooth-out',
+    })
+
+    // ── Magnetic effect on contact cards ──
+    const cleanups: (() => void)[] = []
+    if (window.innerWidth > 768) {
+      document.querySelectorAll<HTMLElement>('.cc-card').forEach(card => {
+        cleanups.push(addMagneticEffect(card, 0.12))
+      })
+      // Magnetic CTA button
+      const ctaBtn = document.querySelector<HTMLElement>('.contact-cta')
+      if (ctaBtn) cleanups.push(addMagneticEffect(ctaBtn, 0.2))
+    }
+
+    // ── ScrambleText on card values on hover ──
+    const scrambleHandler = contextSafe!((e: Event) => {
+      const card = (e.currentTarget as HTMLElement)
+      const valueEl = card.querySelector<HTMLElement>('.cc-value')
+      if (!valueEl) return
+      const originalText = valueEl.getAttribute('data-text') || valueEl.textContent || ''
+      valueEl.setAttribute('data-text', originalText)
+      gsap.to(valueEl, {
+        duration: 0.6,
+        scrambleText: {
+          text: originalText,
+          chars: '0123456789!@#$%^&*()_+',
+          revealDelay: 0.3,
+          speed: 0.4,
+        },
+      })
+    })
+
+    document.querySelectorAll<HTMLElement>('.cc-card').forEach(card => {
+      card.addEventListener('mouseenter', scrambleHandler)
+      cleanups.push(() => card.removeEventListener('mouseenter', scrambleHandler))
+    })
+
+    return () => {
+      split?.revert()
+      cleanups.forEach(fn => fn())
+    }
   }, { scope: containerRef })
 
   return (
@@ -40,12 +116,13 @@ export default function Contact() {
           background: 'radial-gradient(circle, rgba(34,211,165,0.07) 0%, rgba(34,211,165,0.03) 25%, transparent 60%)',
         }}
       />
+      <NeuralReveal color={[34, 211, 165]} count={55} />
 
       <div className="max-w-[1280px] mx-auto relative z-10">
         <div className="contact-label section-label">Contact</div>
 
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="contact-title text-h1 mb-5">
+          <h2 ref={titleRef} className="contact-title text-h1 mb-5">
             Let's build something{' '}
             <span className="text-gradient-accent">together</span>
           </h2>
@@ -54,10 +131,10 @@ export default function Contact() {
           </p>
         </div>
 
-        {/* ── Opus-style contact cards ── */}
+        {/* ── Contact cards ── */}
         <div className="cc-grid">
           {/* GitHub */}
-          <a href={personal.links.github} target="_blank" rel="noopener noreferrer" className="cc-card">
+          <a href={personal.links.github} target="_blank" rel="noopener noreferrer" className="cc-card magnetic">
             <div className="cc-icon"><GitHubIcon /></div>
             <div className="cc-info">
               <span className="cc-label">GitHub</span>
@@ -67,7 +144,7 @@ export default function Contact() {
           </a>
 
           {/* Email */}
-          <a href={`mailto:${personal.email.personal}`} className="cc-card cc-card--email">
+          <a href={`mailto:${personal.email.personal}`} className="cc-card cc-card--email magnetic">
             <div className="cc-icon"><EmailIcon /></div>
             <div className="cc-info">
               <span className="cc-label">Email</span>
@@ -78,7 +155,7 @@ export default function Contact() {
           </a>
 
           {/* LinkedIn */}
-          <a href={personal.links.linkedin} target="_blank" rel="noopener noreferrer" className="cc-card">
+          <a href={personal.links.linkedin} target="_blank" rel="noopener noreferrer" className="cc-card magnetic">
             <div className="cc-icon cc-icon--blue"><LinkedInIcon /></div>
             <div className="cc-info">
               <span className="cc-label">LinkedIn</span>
@@ -92,7 +169,7 @@ export default function Contact() {
         <div className="flex justify-center mb-10 mt-10">
           <a
             href={`mailto:${personal.email.personal}`}
-            className="btn-primary text-base px-8 py-3.5 rounded-full hover:shadow-[0_8px_32px_rgba(34,211,165,0.3),0_0_60px_rgba(34,211,165,0.15)]"
+            className="contact-cta btn-primary text-base px-8 py-3.5 rounded-full magnetic hover:shadow-[0_8px_32px_rgba(34,211,165,0.3),0_0_60px_rgba(34,211,165,0.15)]"
           >
             Send me an email
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
@@ -110,7 +187,7 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* ── Opus-style CSS ── */}
+      {/* ── CSS ── */}
       <style>{`
         .cc-grid {
           display: grid;
@@ -134,13 +211,12 @@ export default function Contact() {
           color: inherit;
           overflow: hidden;
           cursor: pointer;
-          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+          will-change: transform;
         }
 
         .cc-card:hover {
           background: var(--bg-card-hover);
           border-color: rgba(34, 211, 165, 0.2);
-          transform: translateY(-6px);
           box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(34,211,165,0.08);
         }
 

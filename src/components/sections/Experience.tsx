@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
+import { gsap, addTilt3D } from '@/lib/gsap'
 import { personal, achievements } from '@/data/personal'
+import NeuralReveal from '@/components/ui/NeuralReveal'
 
 /* ─── Education progress calculation ─── */
 function getEducationProgress(): number {
@@ -21,34 +22,61 @@ export default function Experience() {
   const progress = getEducationProgress()
 
   useGSAP(() => {
-    gsap.from('.exp-label, .exp-title', {
+    const headerTl = gsap.timeline({
       scrollTrigger: { trigger: containerRef.current, start: 'top 78%' },
-      y: 30, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
     })
+    headerTl.from('.exp-label', { y: 25, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' })
+    headerTl.from('.exp-title', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'smooth-out' }, '-=0.3')
 
-    // Cards staggered entrance
+    // ── Cards entrance ──
     const cards = gsap.utils.toArray<HTMLElement>('.exp-card')
     cards.forEach((card, i) => {
       gsap.from(card, {
-        y: 50, opacity: 0,
-        duration: 0.9, delay: i * 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 90%' },
+        y: 50,
+        autoAlpha: 0,
+        duration: 0.9,
+        delay: i * 0.12,
+        ease: 'smooth-out',
+        scrollTrigger: { trigger: card, start: 'top 88%' },
       })
     })
 
-    // Animate progress bar
-    if (progressRef.current) {
-      gsap.to(progressRef.current, {
-        width: `${progress}%`,
-        duration: 1.8, delay: 0.5, ease: 'power2.out',
-        scrollTrigger: { trigger: progressRef.current, start: 'top 90%' },
+    // ── 3D tilt on cards ──
+    const tiltCleanups: (() => void)[] = []
+    if (window.innerWidth > 768) {
+      cards.forEach(card => {
+        tiltCleanups.push(addTilt3D(card, 7))
       })
+    }
+
+    // ── Progress bar with glow animation ──
+    if (progressRef.current) {
+      const barTl = gsap.timeline({
+        scrollTrigger: { trigger: progressRef.current, start: 'top 88%' },
+      })
+      barTl.to(progressRef.current, {
+        width: `${progress}%`,
+        duration: 2, delay: 0.3, ease: 'smooth-out',
+      })
+      // Pulse glow on the progress dot after bar animates
+      const dot = progressRef.current.querySelector('span')
+      if (dot) {
+        barTl.to(dot, {
+          boxShadow: '0 0 20px var(--accent-2), 0 0 40px rgba(139,92,246,0.3)',
+          duration: 0.8, ease: 'power2.inOut', yoyo: true, repeat: 3,
+        }, '-=0.5')
+      }
+    }
+
+    return () => {
+      tiltCleanups.forEach(fn => fn())
     }
   }, { scope: containerRef })
 
   return (
-    <section id="experience" ref={containerRef} className="section bg-[var(--bg-base)]">
-      <div className="max-w-[1280px] mx-auto">
+    <section id="experience" ref={containerRef} className="section bg-[var(--bg-base)] relative overflow-hidden">
+      <NeuralReveal color={[34, 211, 165]} count={40} />
+      <div className="max-w-[1280px] mx-auto relative z-10">
 
         {/* Header */}
         <div className="exp-label section-label">Experience</div>
@@ -71,7 +99,7 @@ export default function Experience() {
         >
           {/* ── Current Role Card (2-col) ── */}
           <div
-            className="exp-card group relative p-7 md:p-8 overflow-hidden transition-all duration-300 flex flex-col justify-between"
+            className="exp-card tilt-card group relative p-7 md:p-8 overflow-hidden transition-all duration-300 flex flex-col justify-between"
             style={{ gridColumn: 'span 2', background: 'var(--bg-card)', minHeight: 240 }}
           >
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
@@ -95,7 +123,7 @@ export default function Experience() {
           </div>
 
           {/* ── Education Card ── */}
-          <div className="exp-card group relative p-7 overflow-hidden transition-all duration-300 flex flex-col" style={{ background: 'var(--bg-card)' }}>
+          <div className="exp-card tilt-card group relative p-7 overflow-hidden transition-all duration-300 flex flex-col" style={{ background: 'var(--bg-card)' }}>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
             <div className="absolute top-0 right-0 w-28 h-28 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: 'radial-gradient(circle at top right, rgba(139,92,246,0.15) 0%, transparent 70%)' }} />
 

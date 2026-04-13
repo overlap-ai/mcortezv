@@ -9,7 +9,10 @@
       "Bash(curl -s http://localhost:5173)",
       "Bash(curl -s http://localhost:5174)",
       "Bash(cmd /c \"rmdir /s /q \\\\\"C:\\\\Users\\\\mdjes\\\\Downloads\\\\mcortezv\\\\portfolio\\\\\"\")",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(curl -s \"http://localhost:5174/src/main.tsx\")",
+      "Bash(curl -s \"http://localhost:5174/src/lib/gsap.ts\")"
     ]
   }
 }

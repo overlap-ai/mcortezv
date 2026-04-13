@@ -79,23 +79,17 @@ export default function Projects() {
   const svgW = 1200, svgH = 650
 
   useGSAP(() => {
-    gsap.from('.proj-label-h, .proj-title-h, .proj-subtitle-h', {
+    const headerTl = gsap.timeline({
       scrollTrigger: { trigger: containerRef.current, start: 'top 78%' },
-      y: 30, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
     })
-    gsap.from('.proj-node', {
-      scrollTrigger: { trigger: '.proj-canvas', start: 'top 80%' },
-      scale: 0.8, opacity: 0, stagger: 0.1, duration: 0.8, ease: 'back.out(1.4)',
-    })
-    gsap.from('.proj-mini', {
-      scrollTrigger: { trigger: '.proj-canvas', start: 'top 75%' },
-      scale: 0, opacity: 0, stagger: 0.03, duration: 0.5, ease: 'back.out(2)', delay: 0.4,
-    })
+    headerTl.from('.proj-label-h', { y: 25, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' })
+    headerTl.from('.proj-title-h', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'smooth-out' }, '-=0.3')
+    headerTl.from('.proj-subtitle-h', { y: 20, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' }, '-=0.5')
   }, { scope: containerRef })
 
   return (
     <section id="projects" ref={containerRef} className="section bg-[var(--bg-surface)]">
-      <div className="max-w-[1280px] mx-auto">
+      <div className="max-w-[1280px] mx-auto relative z-10">
 
         <div className="proj-label-h section-label">Projects</div>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">

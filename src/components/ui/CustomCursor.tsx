@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from '@/lib/gsap'
 
 export default function CustomCursor() {
@@ -15,26 +15,73 @@ export default function CustomCursor() {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  useEffect(() => {
+  const setupCursor = useCallback(() => {
     if (isTouch) return
 
     const dot  = dotRef.current
     const ring = ringRef.current
     if (!dot || !ring) return
 
-    let mouseX = 0, mouseY = 0
+    // quickTo for silky smooth cursor — reuses a single tween per property
+    const dotX  = gsap.quickTo(dot, 'x', { duration: 0.08, ease: 'power3.out' })
+    const dotY  = gsap.quickTo(dot, 'y', { duration: 0.08, ease: 'power3.out' })
+    const ringX = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3.out' })
+    const ringY = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3.out' })
+
+    // Track velocity for stretch effect
+    let lastX = 0, lastY = 0
+    let velocityX = 0, velocityY = 0
 
     const onMove = (e: MouseEvent) => {
-      mouseX = e.clientX
-      mouseY = e.clientY
-      gsap.to(dot,  { x: mouseX, y: mouseY, duration: 0,    ease: 'none' })
-      gsap.to(ring, { x: mouseX, y: mouseY, duration: 0.18, ease: 'power2.out' })
+      velocityX = e.clientX - lastX
+      velocityY = e.clientY - lastY
+      lastX = e.clientX
+      lastY = e.clientY
+
+      dotX(e.clientX)
+      dotY(e.clientY)
+      ringX(e.clientX)
+      ringY(e.clientY)
+
+      // Subtle stretch based on movement velocity
+      const speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY)
+      const stretch = Math.min(speed * 0.015, 0.35)
+      const angle = Math.atan2(velocityY, velocityX) * (180 / Math.PI)
+
+      if (speed > 2) {
+        gsap.to(ring, {
+          scaleX: 1 + stretch,
+          scaleY: 1 - stretch * 0.5,
+          rotation: angle,
+          duration: 0.15,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        })
+      } else {
+        gsap.to(ring, {
+          scaleX: 1,
+          scaleY: 1,
+          rotation: 0,
+          duration: 0.4,
+          ease: 'elastic.out(1, 0.5)',
+          overwrite: 'auto',
+        })
+      }
     }
 
-    const onHoverIn = () => ring.classList.add('hovering')
-    const onHoverOut = () => ring.classList.remove('hovering')
+    const onHoverIn = () => {
+      ring.classList.add('hovering')
+      gsap.to(dot, { scale: 0.5, duration: 0.25, ease: 'back.out(2)' })
+      gsap.to(ring, { scale: 1.5, duration: 0.35, ease: 'back.out(1.7)' })
+    }
 
-    // Add hover detection to all interactive elements
+    const onHoverOut = () => {
+      ring.classList.remove('hovering')
+      gsap.to(dot, { scale: 1, duration: 0.25, ease: 'power2.out' })
+      gsap.to(ring, { scale: 1, duration: 0.35, ease: 'power2.out' })
+    }
+
+    // Add hover detection to interactive elements
     const targets = document.querySelectorAll('a, button, [role="button"]')
     targets.forEach((el) => {
       el.addEventListener('mouseenter', onHoverIn)
@@ -43,7 +90,7 @@ export default function CustomCursor() {
 
     window.addEventListener('mousemove', onMove)
 
-    // MutationObserver to handle dynamically added elements
+    // MutationObserver for dynamically added elements
     const observer = new MutationObserver(() => {
       const newTargets = document.querySelectorAll('a:not([data-cursor]), button:not([data-cursor])')
       newTargets.forEach((el) => {
@@ -63,6 +110,10 @@ export default function CustomCursor() {
       observer.disconnect()
     }
   }, [isTouch])
+
+  useEffect(() => {
+    return setupCursor()
+  }, [setupCursor])
 
   if (isTouch) return null
 

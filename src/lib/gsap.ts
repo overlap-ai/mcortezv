@@ -2,8 +2,15 @@ import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import SplitText from 'gsap/SplitText'
 import ScrollToPlugin from 'gsap/ScrollToPlugin'
+import ScrambleTextPlugin from 'gsap/ScrambleTextPlugin'
+import CustomEase from 'gsap/CustomEase'
 
-gsap.registerPlugin(ScrollTrigger, SplitText, ScrollToPlugin)
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrollToPlugin, ScrambleTextPlugin, CustomEase)
+
+// ── Cinematic ease curves ──
+CustomEase.create('smooth-out', '0.16, 1, 0.3, 1')
+CustomEase.create('reveal', '0.77, 0, 0.175, 1')
+CustomEase.create('smooth-in-out', '0.76, 0, 0.24, 1')
 
 export { gsap, ScrollTrigger, SplitText }
 
@@ -54,6 +61,39 @@ export function addMagneticEffect(el: HTMLElement, strength = 0.3) {
 
   const handleLeave = () => {
     gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.5)' })
+  }
+
+  el.addEventListener('mousemove', handleMove)
+  el.addEventListener('mouseleave', handleLeave)
+
+  return () => {
+    el.removeEventListener('mousemove', handleMove)
+    el.removeEventListener('mouseleave', handleLeave)
+  }
+}
+
+/** 3D perspective tilt on hover — cinematic depth effect */
+export function addTilt3D(el: HTMLElement, strength = 12) {
+  const handleMove = (e: MouseEvent) => {
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    gsap.to(el, {
+      rotationY: x * strength,
+      rotationX: -y * strength,
+      transformPerspective: 800,
+      duration: 0.4,
+      ease: 'power2.out',
+    })
+  }
+
+  const handleLeave = () => {
+    gsap.to(el, {
+      rotationY: 0,
+      rotationX: 0,
+      duration: 0.7,
+      ease: 'elastic.out(1, 0.5)',
+    })
   }
 
   el.addEventListener('mousemove', handleMove)

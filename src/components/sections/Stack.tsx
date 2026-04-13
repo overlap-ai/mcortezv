@@ -1,8 +1,9 @@
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
+import { gsap, ScrollTrigger, addTilt3D } from '@/lib/gsap'
 import { techStack } from '@/data/personal'
 import type { TechItem } from '@/types'
+import NeuralReveal from '@/components/ui/NeuralReveal'
 
 /* ─── Grouped data ──────────────────────────────────────── */
 const AI_ML  = techStack.filter(t => t.category === 'AI/ML')
@@ -96,19 +97,59 @@ export default function Stack() {
   const containerRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
-    gsap.from('.stack-label-h, .stack-title-h', {
-      scrollTrigger: { trigger: containerRef.current, start: 'top 80%' },
-      y: 30, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
+    const headerTl = gsap.timeline({
+      scrollTrigger: { trigger: containerRef.current, start: 'top 78%' },
     })
-    gsap.from('.stack-cell', {
-      scrollTrigger: { trigger: '.stack-bento', start: 'top 82%' },
-      y: 30, opacity: 0, stagger: 0.07, duration: 0.55, ease: 'power3.out', delay: 0.2,
+    headerTl.from('.stack-label-h', { y: 25, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' })
+    headerTl.from('.stack-title-h', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'smooth-out' }, '-=0.3')
+
+    // ── ScrollTrigger.batch for dramatic cell reveals ──
+    ScrollTrigger.batch('.stack-cell', {
+      start: 'top 88%',
+      onEnter: (elements) => {
+        gsap.from(elements, {
+          y: 100,
+          scale: 0.8,
+          opacity: 0,
+          rotateX: 8,
+          transformPerspective: 1000,
+          stagger: 0.1,
+          duration: 1.2,
+          ease: 'smooth-out',
+          overwrite: true,
+        })
+      },
     })
+
+    // ── 3D tilt on cells ──
+    const tiltCleanups: (() => void)[] = []
+    if (window.innerWidth > 768) {
+      gsap.utils.toArray<HTMLElement>('.stack-cell').forEach(cell => {
+        tiltCleanups.push(addTilt3D(cell, 6))
+      })
+    }
+
+    // ── Parallax on the bento grid ──
+    gsap.to('.stack-bento', {
+      y: -25,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.stack-bento',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1.5,
+      },
+    })
+
+    return () => {
+      tiltCleanups.forEach(fn => fn())
+    }
   }, { scope: containerRef })
 
   return (
-    <section id="stack" ref={containerRef} className="section bg-[var(--bg-surface)]">
-      <div className="max-w-[1280px] mx-auto">
+    <section id="stack" ref={containerRef} className="section bg-[var(--bg-surface)] relative overflow-hidden">
+      <NeuralReveal color={[139, 92, 246]} count={45} />
+      <div className="max-w-[1280px] mx-auto relative z-10">
 
         <div className="stack-label-h section-label">Tech Stack</div>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -133,7 +174,7 @@ export default function Stack() {
           }}
         >
           {/* AI/ML — 2 cols */}
-          <div className="stack-cell flex flex-col p-6 md:p-8 min-h-[220px]" style={{ gridColumn: '1 / 3', background: 'var(--bg-card)' }}>
+          <div className="stack-cell tilt-card flex flex-col p-6 md:p-8 min-h-[220px]" style={{ gridColumn: '1 / 3', background: 'var(--bg-card)' }}>
             <CellLabel text="AI / ML Stack" color="#22d3a5" />
             <AIPipelineViz />
             <div className="space-y-2.5 mt-auto">
@@ -154,7 +195,7 @@ export default function Stack() {
           </div>
 
           {/* Languages */}
-          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+          <div className="stack-cell tilt-card flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
             <CellLabel text="Languages" color="#22d3a5" />
             <div className="space-y-4 mt-auto">
               {LANGS.map(t => (
@@ -173,7 +214,7 @@ export default function Stack() {
           </div>
 
           {/* Framework */}
-          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+          <div className="stack-cell tilt-card flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
             <CellLabel text="Framework" color="#8b5cf6" />
             {FW.map(t => (
               <div key={t.name} className="mt-auto">
@@ -193,7 +234,7 @@ export default function Stack() {
           </div>
 
           {/* Database — 2 cols */}
-          <div className="stack-cell flex flex-col p-6 md:p-8 min-h-[180px]" style={{ gridColumn: '1 / 3', background: 'var(--bg-card)' }}>
+          <div className="stack-cell tilt-card flex flex-col p-6 md:p-8 min-h-[180px]" style={{ gridColumn: '1 / 3', background: 'var(--bg-card)' }}>
             <CellLabel text="Database" color="#3b82f6" />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-auto">
               {DB.map(t => (
@@ -209,7 +250,7 @@ export default function Stack() {
           </div>
 
           {/* Infrastructure */}
-          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+          <div className="stack-cell tilt-card flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
             <CellLabel text="Infrastructure" color="#f97316" />
             <div className="space-y-3 mt-auto">
               {INFRA.map(t => (
@@ -228,7 +269,7 @@ export default function Stack() {
           </div>
 
           {/* Tools */}
-          <div className="stack-cell flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
+          <div className="stack-cell tilt-card flex flex-col p-6" style={{ background: 'var(--bg-card)' }}>
             <CellLabel text="Tools" color="var(--text-muted)" />
             <div className="space-y-3 mt-auto">
               {TOOLS.map(t => (

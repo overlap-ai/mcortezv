@@ -1,8 +1,9 @@
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap } from '@/lib/gsap'
+import { gsap, ScrollTrigger, addTilt3D } from '@/lib/gsap'
 import { papers } from '@/data/papers'
 import { useNavigate } from 'react-router-dom'
+import NeuralReveal from '@/components/ui/NeuralReveal'
 
 const STATUS_COLORS: Record<string, string> = {
   published:    '#22d3a5',
@@ -19,14 +20,41 @@ export default function Research() {
   const navigate     = useNavigate()
 
   useGSAP(() => {
-    gsap.from('.research-label-h, .research-title-h', {
+    const headerTl = gsap.timeline({
       scrollTrigger: { trigger: containerRef.current, start: 'top 78%' },
-      y: 30, opacity: 0, stagger: 0.1, duration: 0.65, ease: 'power3.out',
     })
-    gsap.from('.paper-cell', {
-      scrollTrigger: { trigger: '.papers-bento', start: 'top 80%' },
-      y: 40, opacity: 0, stagger: 0.09, duration: 0.65, ease: 'power3.out', delay: 0.15,
+    headerTl.from('.research-label-h', { y: 25, autoAlpha: 0, duration: 0.6, ease: 'smooth-out' })
+    headerTl.from('.research-title-h', { y: 40, autoAlpha: 0, duration: 0.8, ease: 'smooth-out' }, '-=0.3')
+
+    // ── ScrollTrigger.batch for dramatic paper cell reveals ──
+    ScrollTrigger.batch('.paper-cell', {
+      start: 'top 88%',
+      onEnter: (elements) => {
+        gsap.from(elements, {
+          y: 120,
+          scale: 0.8,
+          opacity: 0,
+          rotateX: 8,
+          transformPerspective: 1000,
+          stagger: 0.12,
+          duration: 1.2,
+          ease: 'smooth-out',
+          overwrite: true,
+        })
+      },
     })
+
+    // ── 3D tilt on paper cells ──
+    const tiltCleanups: (() => void)[] = []
+    if (window.innerWidth > 768) {
+      gsap.utils.toArray<HTMLElement>('.paper-cell').forEach(cell => {
+        tiltCleanups.push(addTilt3D(cell, 5))
+      })
+    }
+
+    return () => {
+      tiltCleanups.forEach(fn => fn())
+    }
   }, { scope: containerRef })
 
   const featured = papers[0]
@@ -36,8 +64,9 @@ export default function Research() {
   const categories = [...new Set(papers.map(p => p.category))]
 
   return (
-    <section id="research" ref={containerRef} className="section bg-[var(--bg-base)]">
-      <div className="max-w-[1280px] mx-auto">
+    <section id="research" ref={containerRef} className="section bg-[var(--bg-base)] relative overflow-hidden">
+      <NeuralReveal color={[249, 115, 22]} count={40} />
+      <div className="max-w-[1280px] mx-auto relative z-10">
 
         {/* Header */}
         <div className="research-label-h section-label">Research</div>

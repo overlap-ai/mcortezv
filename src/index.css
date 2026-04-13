@@ -384,6 +384,30 @@ body {
 .word { display: inline-block; overflow: hidden; }
 .char { display: inline-block; }
 
+/* ─── 3D Tilt Card ──────────────────────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-card > * {
+  transform: translateZ(0);
+}
+.tilt-inner {
+  transform: translateZ(30px);
+}
+
+/* ─── Reveal mask for SplitText lines ───────────────────── */
+.line-mask {
+  overflow: hidden;
+  display: block;
+}
+
+/* ─── Magnetic element ──────────────────────────────────── */
+.magnetic {
+  will-change: transform;
+  transition: none;
+}
+
 /* ─── Paper / Academic Styles ────────────────────────────── */
 .paper-page {
   background: var(--paper-bg);

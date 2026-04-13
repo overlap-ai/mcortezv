@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap, scrollTo } from '@/lib/gsap'
+import { gsap, ScrollTrigger, scrollTo, addMagneticEffect } from '@/lib/gsap'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const NAV_LINKS = [
@@ -14,16 +14,47 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled]   = useState(false)
   const [mobileOpen, setMobile]   = useState(false)
+  const navRef                    = useRef<HTMLElement>(null)
   const dropdownRef               = useRef<HTMLDivElement>(null)
+  const logoRef                   = useRef<HTMLButtonElement>(null)
   const location                  = useLocation()
   const navigate                  = useNavigate()
   const isPaperPage               = location.pathname.startsWith('/papers/')
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  // ── ScrollTrigger-driven navbar background ──
+  useGSAP(() => {
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: '60px top',
+      onEnter: () => setScrolled(true),
+      onLeaveBack: () => setScrolled(false),
+    })
+
+    // ── Magnetic effect on logo ──
+    const cleanups: (() => void)[] = []
+    if (logoRef.current && window.innerWidth > 768) {
+      cleanups.push(addMagneticEffect(logoRef.current, 0.15))
+    }
+
+    // ── Logo entrance — dramatic scale + blur ──
+    if (logoRef.current) {
+      gsap.from(logoRef.current, {
+        scale: 0.5, autoAlpha: 0,
+        duration: 0.8, ease: 'back.out(1.7)', delay: 0.3,
+      })
+    }
+
+    // ── Nav links entrance — staggered with blur ──
+    gsap.from('.nav-link-item', {
+      y: -20, autoAlpha: 0,
+      stagger: 0.06,
+      duration: 0.6,
+      ease: 'smooth-out',
+      delay: 0.6,
+    })
+
+    return () => cleanups.forEach(fn => fn())
+  })
 
   useEffect(() => {
     if (!mobileOpen) return
@@ -53,6 +84,7 @@ export default function Navbar() {
   return (
     <>
       <nav
+        ref={navRef}
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b"
         style={{
           background: scrolled || mobileOpen ? 'rgba(6,6,6,0.85)' : 'transparent',
@@ -62,7 +94,7 @@ export default function Navbar() {
         }}
       >
         <div className="flex items-center justify-between px-6 md:px-10 h-16 max-w-[1280px] mx-auto">
-          <button onClick={() => handleNav('hero')} className="flex items-center gap-2.5 group">
+          <button ref={logoRef} onClick={() => handleNav('hero')} className="flex items-center gap-2.5 group magnetic">
             <div className="w-7 h-7 rounded-lg bg-[var(--accent)] flex items-center justify-center">
               <span className="text-[#060606] font-black text-xs">MC</span>
             </div>
@@ -76,7 +108,7 @@ export default function Navbar() {
               <button
                 key={link.id}
                 onClick={() => handleNav(link.id)}
-                className="nav-link px-3 py-1.5 rounded-md hover:bg-[var(--bg-card)] transition-colors"
+                className="nav-link nav-link-item px-3 py-1.5 rounded-md hover:bg-[var(--bg-card)] transition-colors"
               >
                 {link.label}
               </button>
@@ -88,7 +120,7 @@ export default function Navbar() {
               href="https://github.com/mcortezv"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost py-1.5 px-3 text-xs"
+              className="nav-link-item btn-ghost py-1.5 px-3 text-xs"
             >
               GitHub ↗
             </a>
@@ -106,7 +138,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile Dropdown (PotroNET-style) ── */}
+      {/* ── Mobile Dropdown ── */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobile(false)}>
           {/* Backdrop */}
