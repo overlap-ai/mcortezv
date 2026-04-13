@@ -142,13 +142,13 @@ export default function Hero() {
             ref={titleRef}
             className="font-display mb-7 md:mb-8 text-[var(--text)]"
             style={{
-              fontSize: 'clamp(5.7rem, 9vw, 8.5rem)',
+              fontSize: 'clamp(4rem, 9vw, 8.5rem)',
               fontWeight: 800,
               lineHeight: 0.94,
               letterSpacing: '-0.035em',
             }}
           >
-            Manuel<br className="hidden sm:block" /> Cortez
+            Manuel<br /> Cortez
           </h1>
 
           {/* Role line */}

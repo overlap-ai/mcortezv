@@ -226,12 +226,12 @@ export default function Research() {
                 >
                   {paper.category}
                 </span>
-                <svg
-                  width="10" height="10" viewBox="0 0 11 11" fill="none"
-                  className="opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-[var(--accent)]"
-                >
-                  <path d="M1 10L10 1M10 1H5M10 1V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <span className="inline-flex items-center gap-1 font-mono text-[0.58rem] uppercase tracking-[0.1em] text-[var(--accent)] opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200">
+                  <span>Read</span>
+                  <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                    <path d="M1 10L10 1M10 1H5M10 1V6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
               </div>
 
               {/* Title */}

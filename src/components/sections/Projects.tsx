@@ -202,9 +202,15 @@ export default function Projects() {
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: proj.color }} />
                           {proj.label}
                         </span>
-                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ color: proj.color }}>
-                          <path d="M1 13L13 1M13 1H6M13 1V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                        <span
+                          className="inline-flex items-center gap-1 font-mono text-[0.55rem] uppercase tracking-[0.1em] opacity-70 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5"
+                          style={{ color: proj.color }}
+                        >
+                          <span>Visit</span>
+                          <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+                            <path d="M1 13L13 1M13 1H6M13 1V8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </span>
                       </div>
                       <h3 className="text-lg font-bold text-[var(--text)] mb-2 leading-tight group-hover:text-white transition-colors duration-200">{proj.name}</h3>
                       <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3 line-clamp-2">{proj.description}</p>
@@ -224,7 +230,7 @@ export default function Projects() {
         <style>{`
           @media (max-width: 768px) {
             .proj-canvas { min-height: auto !important; display: flex; flex-direction: column; gap: 1rem; }
-            .proj-canvas svg, .proj-mini { display: none !important; }
+            .proj-canvas > svg, .proj-mini { display: none !important; }
             .proj-node { position: relative !important; left: auto !important; top: auto !important; transform: none !important; width: 100% !important; opacity: 1 !important; }
           }
         `}</style>
