@@ -45,6 +45,9 @@ export default function Contact() {
         ease: 'smooth-out',
       }, '-=0.3')
     }
+    headerTl.from('.contact-together', {
+      y: 40, autoAlpha: 0, duration: 0.8, ease: 'smooth-out',
+    }, '-=0.6')
     headerTl.from('.contact-sub', {
       y: 30, autoAlpha: 0, duration: 0.8, ease: 'smooth-out',
     }, '-=0.5')
@@ -122,9 +125,9 @@ export default function Contact() {
         <div className="contact-label section-label">Contact</div>
 
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 ref={titleRef} className="contact-title text-h1 mb-5">
-            Let's build something{' '}
-            <span className="text-gradient-accent">together</span>
+          <h2 className="contact-title text-h1 mb-5">
+            <span ref={titleRef}>Let's build something </span>
+            <span className="text-gradient-accent contact-together">together</span>
           </h2>
           <p className="contact-sub text-body-lg text-[var(--text-secondary)]">
             Have a project in mind? Let's talk about AI, automation, or anything interesting.

@@ -6,10 +6,10 @@ import Projects   from '@/components/sections/Projects'
 import Research   from '@/components/sections/Research'
 import Contact    from '@/components/sections/Contact'
 
-export default function HomePage() {
+export default function HomePage({ heroReady }: { heroReady: boolean }) {
   return (
     <main>
-      <Hero />
+      <Hero canAnimate={heroReady} />
       <About />
       <Stack />
       <Experience />

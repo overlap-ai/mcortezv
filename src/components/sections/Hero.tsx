@@ -3,38 +3,38 @@ import { useGSAP } from '@gsap/react'
 import { gsap, scrollTo, addMagneticEffect } from '@/lib/gsap'
 import HeroCanvas from './HeroCanvas'
 
-export default function Hero() {
+export default function Hero({ canAnimate = false }: { canAnimate?: boolean }) {
   const containerRef = useRef<HTMLElement>(null)
   const titleRef     = useRef<HTMLHeadingElement>(null)
   const contentRef   = useRef<HTMLDivElement>(null)
 
+  // ── Hide everything immediately on mount ─────────────────
   useGSAP(() => {
-    if (!titleRef.current || !containerRef.current) return
+    if (!titleRef.current) return
+    gsap.set(titleRef.current,  { autoAlpha: 0 })
+    gsap.set('.hero-label',     { y: 25, autoAlpha: 0 })
+    gsap.set('.hero-role',      { autoAlpha: 0, y: 15 })
+    gsap.set('.hero-desc',      { y: 20, autoAlpha: 0 })
+    gsap.set('.hero-cta',       { y: 15, autoAlpha: 0 })
+    gsap.set('.hero-meta',      { autoAlpha: 0 })
+    gsap.set('.hero-scroll',    { autoAlpha: 0, y: 10 })
+  }, { scope: containerRef })
 
-    // Set initial hidden states
-    gsap.set(titleRef.current, { autoAlpha: 0 })
-    gsap.set('.hero-label', { y: 25, autoAlpha: 0 })
-    gsap.set('.hero-role', { autoAlpha: 0, y: 15 })
-    gsap.set('.hero-desc', { y: 20, autoAlpha: 0 })
-    gsap.set('.hero-cta', { y: 15, autoAlpha: 0 })
-    gsap.set('.hero-meta', { autoAlpha: 0 })
-    gsap.set('.hero-scroll', { autoAlpha: 0, y: 10 })
+  // ── Entrance: fires when modal is dismissed ───────────────
+  useGSAP(() => {
+    if (!canAnimate || !titleRef.current || !containerRef.current) return
 
-    // ── Master entrance timeline (title fades in right at explosion moment) ──
+    // delay: 2.7 syncs with the canvas particle explosion moment
     const tl = gsap.timeline({ delay: 2.7 })
-
-    // Title fades in slowly during the final moments of text formation + explosion
-    // so the particles and DOM text crossfade seamlessly
     tl.to(titleRef.current, { autoAlpha: 1, duration: 1.0, ease: 'power2.inOut' })
+    tl.to('.hero-label',    { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.5')
+    tl.to('.hero-role',     { autoAlpha: 1, y: 0, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
+    tl.to('.hero-desc',     { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
+    tl.to('.hero-cta',      { y: 0, autoAlpha: 1, stagger: 0.08, duration: 0.4, ease: 'smooth-out' }, '-=0.25')
+    tl.to('.hero-meta',     { autoAlpha: 1, duration: 0.4 }, '-=0.2')
+    tl.to('.hero-scroll',   { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.15')
 
-    tl.to('.hero-label', { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.5')
-    tl.to('.hero-role', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
-    tl.to('.hero-desc', { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
-    tl.to('.hero-cta', { y: 0, autoAlpha: 1, stagger: 0.08, duration: 0.4, ease: 'smooth-out' }, '-=0.25')
-    tl.to('.hero-meta', { autoAlpha: 1, duration: 0.4 }, '-=0.2')
-    tl.to('.hero-scroll', { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.15')
-
-    // ── PINNED SCALE-DOWN on scroll (the money shot) ──
+    // ── PINNED SCALE-DOWN on scroll ──
     const scaleTl = gsap.timeline({
       scrollTrigger: {
         trigger: '#hero',
@@ -44,13 +44,9 @@ export default function Hero() {
         scrub: 0.5,
       },
     })
-    scaleTl.to('.hero-inner', {
-      scale: 0.92,
-      borderRadius: '24px',
-      duration: 1,
-    })
+    scaleTl.to('.hero-inner', { scale: 0.92, borderRadius: '24px', duration: 1 })
 
-    // ── Scroll indicator fades with scrub (separate ScrollTrigger) ──
+    // ── Scroll indicator fade ──
     gsap.to('.hero-scroll', {
       autoAlpha: 0,
       y: -20,
@@ -69,10 +65,8 @@ export default function Hero() {
       cleanups.push(addMagneticEffect(btn, 0.25))
     })
 
-    return () => {
-      cleanups.forEach(fn => fn())
-    }
-  }, { scope: containerRef })
+    return () => { cleanups.forEach(fn => fn()) }
+  }, { scope: containerRef, dependencies: [canAnimate] })
 
   return (
     <section
@@ -91,8 +85,8 @@ export default function Hero() {
           background: '#060606',
         }}
       >
-        {/* ── Generative art canvas ── */}
-        <HeroCanvas />
+        {/* ── Generative art canvas — mounts only after modal is dismissed ── */}
+        {canAnimate && <HeroCanvas />}
 
         {/* ── Parallax glow blobs ── */}
         <div

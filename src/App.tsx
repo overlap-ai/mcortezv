@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Lenis from 'lenis'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import Navbar       from '@/components/layout/Navbar'
 import Footer       from '@/components/layout/Footer'
 import CustomCursor from '@/components/ui/CustomCursor'
+import MusicModal   from '@/components/ui/MusicModal'
 import HomePage     from '@/pages/HomePage'
 import PaperPage    from '@/pages/PaperPage'
 
@@ -32,26 +33,29 @@ function useSmoothScroll() {
   }, [])
 }
 
-function MainLayout() {
+function MainLayout({ heroReady }: { heroReady: boolean }) {
   return (
     <>
       <Navbar />
-      <HomePage />
+      <HomePage heroReady={heroReady} />
       <Footer />
     </>
   )
 }
 
 export default function App() {
+  const [heroReady, setHeroReady] = useState(false)
   useSmoothScroll()
 
   return (
     <BrowserRouter>
       <div className="grain-overlay" aria-hidden="true" />
       <CustomCursor />
+      {/* MusicModal lives outside Routes so audio persists on all pages */}
+      <MusicModal onDone={() => setHeroReady(true)} />
 
       <Routes>
-        <Route path="/"              element={<MainLayout />} />
+        <Route path="/"              element={<MainLayout heroReady={heroReady} />} />
         <Route path="/papers/:slug"  element={<PaperPage />} />
       </Routes>
     </BrowserRouter>
