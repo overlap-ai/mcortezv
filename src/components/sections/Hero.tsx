@@ -92,7 +92,7 @@ export default function Hero({ canAnimate = false }: { canAnimate?: boolean }) {
       <div
         className="hero-inner relative overflow-hidden"
         style={{
-          minHeight: '100dvh',
+          minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
           willChange: 'transform',
