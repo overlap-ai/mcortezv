@@ -46,17 +46,19 @@ export default function Hero({ canAnimate = false }: { canAnimate?: boolean }) {
       tl.to('.hero-scroll',   { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.15')
     }
 
-    // ── PINNED SCALE-DOWN on scroll ──
-    const scaleTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: '#hero',
-        start: 'top top',
-        end: '+=50%',
-        pin: true,
-        scrub: 0.5,
-      },
-    })
-    scaleTl.to('.hero-inner', { scale: 0.92, borderRadius: '24px', duration: 1 })
+    // ── PINNED SCALE-DOWN on scroll (desktop only — pin adds extra scroll space) ──
+    if (!isMobile) {
+      const scaleTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#hero',
+          start: 'top top',
+          end: '+=50%',
+          pin: true,
+          scrub: 0.5,
+        },
+      })
+      scaleTl.to('.hero-inner', { scale: 0.92, borderRadius: '24px', duration: 1 })
+    }
 
     // ── Scroll indicator fade ──
     gsap.to('.hero-scroll', {
@@ -90,7 +92,7 @@ export default function Hero({ canAnimate = false }: { canAnimate?: boolean }) {
       <div
         className="hero-inner relative overflow-hidden"
         style={{
-          minHeight: '100vh',
+          minHeight: '100dvh',
           display: 'flex',
           alignItems: 'center',
           willChange: 'transform',
