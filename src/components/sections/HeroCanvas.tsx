@@ -151,6 +151,7 @@ export default function HeroCanvas() {
     let W = 0, H = 0
     let exploded = false
     let flowFieldCount = 100
+    let explosionCx = 0, explosionCy = 0
 
     function makeParticle(w: number, h: number, target?: { x: number; y: number }): P {
       return {
@@ -179,7 +180,19 @@ export default function HeroCanvas() {
       ctx.fillStyle = '#060606'
       ctx.fillRect(0, 0, W, H)
 
+      const isMobile = W < 768
+
+      // Always sample text positions — on mobile only to get the explosion center
       const textPositions = sampleTextPositions(W, H, canvas)
+
+      // Explosion center = centroid of text pixels (same on mobile and desktop)
+      if (textPositions.length > 0) {
+        explosionCx = textPositions.reduce((s, p) => s + p.x, 0) / textPositions.length
+        explosionCy = textPositions.reduce((s, p) => s + p.y, 0) / textPositions.length
+      } else {
+        explosionCx = W / 2
+        explosionCy = H / 2
+      }
 
       // Shuffle text positions for natural distribution
       for (let i = textPositions.length - 1; i > 0; i--) {
@@ -187,21 +200,22 @@ export default function HeroCanvas() {
         ;[textPositions[i], textPositions[j]] = [textPositions[j], textPositions[i]]
       }
 
-      // Cap text particles — fewer on mobile for performance
-      const isMobile = W < 768
-      const maxTextParticles = isMobile ? 450 : 600
+      const maxTextParticles = 600
       let usedPositions = textPositions
       if (textPositions.length > maxTextParticles) {
         const every = Math.ceil(textPositions.length / maxTextParticles)
         usedPositions = textPositions.filter((_, i) => i % every === 0)
       }
       particles = []
-      for (let i = 0; i < usedPositions.length; i++) {
-        particles.push(makeParticle(W, H, usedPositions[i]))
+      // On mobile: skip text particles — ambient only
+      if (!isMobile) {
+        for (let i = 0; i < usedPositions.length; i++) {
+          particles.push(makeParticle(W, H, usedPositions[i]))
+        }
       }
-      // Ambient particles
+      // Ambient particles — more on mobile since there are no text particles
       const extraCount = isMobile
-        ? Math.max(30, Math.min(80, Math.floor((W * H) / 6000)))
+        ? Math.max(180, Math.min(280, Math.floor((W * H) / 1800)))
         : Math.max(15, Math.floor(usedPositions.length * 0.08))
       for (let i = 0; i < extraCount; i++) {
         particles.push(makeParticle(W, H))
@@ -226,15 +240,17 @@ export default function HeroCanvas() {
       const elapsed = (performance.now() - startTime) / 1000
       const forming = formingStrength(elapsed)
       const flow = flowFieldStrength(elapsed)
+      const isMobile = W < 768
 
-      // Fade trail — crisp during text, normal otherwise
-      ctx.fillStyle = `rgba(6,6,6,${forming > 0.5 ? 0.15 : 0.055})`
+      // Fade trail — crisp during text, normal otherwise; slower fade on mobile so trails persist
+      const fadeAlpha = isMobile ? 0.03 : (forming > 0.5 ? 0.15 : 0.055)
+      ctx.fillStyle = `rgba(6,6,6,${fadeAlpha})`
       ctx.fillRect(0, 0, W, H)
 
       time += 0.0035
 
-      /* ── Neural-network connection lines (only during forming) ── */
-      if (forming > 0.25) {
+      /* ── Neural-network connection lines (only during forming, desktop only) ── */
+      if (!isMobile && forming > 0.25) {
         ctx.lineWidth = 0.5
         const threshold = 40 + forming * 40
         const threshSq = threshold * threshold
@@ -254,7 +270,7 @@ export default function HeroCanvas() {
               ctx.beginPath()
               ctx.moveTo(a.x, a.y)
               ctx.lineTo(b.x, b.y)
-              ctx.strokeStyle = `rgba(34,211,165,${a2})`
+              ctx.strokeStyle = `rgba(255,255,255,${a2})`
               ctx.stroke()
             }
           }
@@ -264,12 +280,8 @@ export default function HeroCanvas() {
       /* ── Explosion impulse — one-time burst ── */
       if (elapsed >= EXPLOSION_TIME && !exploded) {
         exploded = true
-        let sumX = 0, sumY = 0, cnt = 0
-        for (const p of particles) {
-          if (p.hasTarget) { sumX += p.x; sumY += p.y; cnt++ }
-        }
-        const cx = cnt > 0 ? sumX / cnt : W / 2
-        const cy = cnt > 0 ? sumY / cnt : H / 2
+        const cx = explosionCx
+        const cy = explosionCy
         for (const p of particles) {
           const dx = p.x - cx
           const dy = p.y - cy
@@ -311,8 +323,9 @@ export default function HeroCanvas() {
           p.vy += (Math.sin(angle) * 0.09 + cy) * p.speed * flow
         }
 
-        /* Damping — smooth blend from explosion drift (0.997) to flow field (0.91) */
-        const damp = forming > 0 ? 1 : 0.997 - flow * 0.087  // 0.997 → 0.91 as flow goes 0→1
+        /* Damping — no friction during text forming on desktop so springs work freely;
+           on mobile always damp so ambient particles stay on screen until explosion */
+        const damp = (!isMobile && forming > 0) ? 1 : 0.997 - flow * 0.087
         p.vx *= damp
         p.vy *= damp
 
@@ -320,8 +333,9 @@ export default function HeroCanvas() {
         p.y += p.vy
         p.life++
 
-        /* Respawn — only up to flowFieldCount once explosion has settled */
-        if (forming < 0.05 && (p.life > p.maxLife || p.x < -8 || p.x > W + 8 || p.y < -8 || p.y > H + 8)) {
+        /* Respawn — pre-explosion mobile: free respawn to keep canvas populated;
+           post-explosion / desktop: only after forming phase */
+        if (((!exploded && isMobile) || forming < 0.05) && (p.life > p.maxLife || p.x < -8 || p.x > W + 8 || p.y < -8 || p.y > H + 8)) {
           if (exploded && activeCount > flowFieldCount) {
             // Let excess particles die — don't respawn
             p.life = p.maxLife // mark as dead, skip drawing
@@ -335,17 +349,29 @@ export default function HeroCanvas() {
           continue
         }
 
-        /* Alpha — bright during forming, normal life-cycle otherwise */
+        /* Alpha — mobile: burst on explosion then fades to subtle trails;
+           desktop: bright during forming, life-cycle sine otherwise */
         const lifeT = p.life / p.maxLife
-        const alpha = forming > 0.1
-          ? 0.45 + forming * 0.45
-          : Math.sin(lifeT * Math.PI) * 0.72
+        const alpha = isMobile
+          ? (exploded
+              ? Math.max(0.04, 0.5 * Math.max(0, 1 - (elapsed - EXPLOSION_TIME) / 2.0))
+              : 0.04)
+          : (forming > 0.1
+            ? 0.45 + forming * 0.45
+            : Math.sin(lifeT * Math.PI) * 0.72)
 
-        /* Color: teal → purple by speed */
-        const spd = Math.min(1, Math.sqrt(p.vx * p.vx + p.vy * p.vy) * 1.8)
-        const r = 34 + (105 * spd) | 0
-        const g = 211 - (119 * spd) | 0
-        const b = 165 + (81 * spd) | 0
+        /* Color: white during forming, blends to teal→purple on explosion (desktop only) */
+        let r = 255, g = 255, b = 255
+        if (!isMobile && exploded) {
+          const colorT = Math.min(1, (elapsed - EXPLOSION_TIME) / 1.5)
+          const spd = Math.min(1, Math.sqrt(p.vx * p.vx + p.vy * p.vy) * 1.8)
+          const tr = (34 + (105 * spd)) | 0
+          const tg = (211 - (119 * spd)) | 0
+          const tb = (165 + (81 * spd)) | 0
+          r = Math.round(255 + (tr - 255) * colorT)
+          g = Math.round(255 + (tg - 255) * colorT)
+          b = Math.round(255 + (tb - 255) * colorT)
+        }
         const sz = forming > 0.1 ? p.size * (0.8 + forming * 0.6) : p.size
 
         ctx.beginPath()

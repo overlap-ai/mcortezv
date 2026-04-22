@@ -49,7 +49,7 @@ export default function PaperPage() {
   const contentRef   = useRef<HTMLDivElement>(null)
   const metaRef      = useRef<HTMLDivElement>(null)
   const [html, setHtml] = useState('')
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
 
   useEffect(() => {
     if (!paper) return

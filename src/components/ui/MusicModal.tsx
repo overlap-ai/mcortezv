@@ -216,9 +216,7 @@ export default function MusicModal({ onDone }: Props) {
           >
             <div
               className="absolute inset-0"
-              style={{
-                background: 'linear-gradient(135deg, #3b0a0a 0%, #6e1212 100%)',
-              }}
+              style={{ background: 'var(--bg-surface)' }}
             />
             <img
               src="/music/appetite-cover.jpg"

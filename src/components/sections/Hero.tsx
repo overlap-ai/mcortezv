@@ -24,15 +24,27 @@ export default function Hero({ canAnimate = false }: { canAnimate?: boolean }) {
   useGSAP(() => {
     if (!canAnimate || !titleRef.current || !containerRef.current) return
 
-    // delay: 2.7 syncs with the canvas particle explosion moment
-    const tl = gsap.timeline({ delay: 2.7 })
-    tl.to(titleRef.current, { autoAlpha: 1, duration: 1.0, ease: 'power2.inOut' })
-    tl.to('.hero-label',    { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.5')
-    tl.to('.hero-role',     { autoAlpha: 1, y: 0, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
-    tl.to('.hero-desc',     { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
-    tl.to('.hero-cta',      { y: 0, autoAlpha: 1, stagger: 0.08, duration: 0.4, ease: 'smooth-out' }, '-=0.25')
-    tl.to('.hero-meta',     { autoAlpha: 1, duration: 0.4 }, '-=0.2')
-    tl.to('.hero-scroll',   { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.15')
+    const isMobile = window.innerWidth < 768
+
+    if (isMobile) {
+      // Simple fade for mobile — no particle explosion sync needed
+      const tl = gsap.timeline({ delay: 0.3 })
+      tl.to(
+        [titleRef.current, '.hero-label', '.hero-role', '.hero-desc', '.hero-cta', '.hero-meta'],
+        { autoAlpha: 1, y: 0, stagger: 0.09, duration: 0.6, ease: 'power2.out' },
+      )
+      tl.to('.hero-scroll', { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.2')
+    } else {
+      // delay: 2.7 syncs with the canvas particle explosion moment
+      const tl = gsap.timeline({ delay: 2.7 })
+      tl.to(titleRef.current, { autoAlpha: 1, duration: 1.0, ease: 'power2.inOut' })
+      tl.to('.hero-label',    { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.5')
+      tl.to('.hero-role',     { autoAlpha: 1, y: 0, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
+      tl.to('.hero-desc',     { y: 0, autoAlpha: 1, duration: 0.5, ease: 'smooth-out' }, '-=0.3')
+      tl.to('.hero-cta',      { y: 0, autoAlpha: 1, stagger: 0.08, duration: 0.4, ease: 'smooth-out' }, '-=0.25')
+      tl.to('.hero-meta',     { autoAlpha: 1, duration: 0.4 }, '-=0.2')
+      tl.to('.hero-scroll',   { autoAlpha: 1, y: 0, duration: 0.4 }, '-=0.15')
+    }
 
     // ── PINNED SCALE-DOWN on scroll ──
     const scaleTl = gsap.timeline({
