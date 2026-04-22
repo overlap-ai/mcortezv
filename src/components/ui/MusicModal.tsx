@@ -199,8 +199,8 @@ export default function MusicModal({ onDone }: Props) {
           ref={miniRef}
           className="fixed flex items-center gap-3 rounded-2xl"
           style={{
-            bottom: '1.5rem',
-            right: '1.5rem',
+            bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
+            right: 'calc(1.5rem + env(safe-area-inset-right, 0px))',
             zIndex: 9990,
             width: '260px',
             padding: '0.6rem 0.75rem',

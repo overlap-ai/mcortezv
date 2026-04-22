@@ -195,6 +195,9 @@ export default function PaperPage() {
         style={{
           background: darkMode ? 'rgba(10,10,10,0.9)' : 'rgba(248,247,244,0.9)',
           borderBottom: `1px solid ${theme.border}`,
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingLeft: 'env(safe-area-inset-left, 0px)',
+          paddingRight: 'env(safe-area-inset-right, 0px)',
         }}
       >
         <div className="max-w-5xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between">
@@ -432,7 +435,7 @@ export default function PaperPage() {
       {/* ── Paper Footer ── */}
       <footer
         className="py-8 px-5 md:px-8 text-center transition-colors duration-300"
-        style={{ background: theme.bg, borderTop: `1px solid ${theme.border}` }}
+        style={{ background: theme.bg, borderTop: `1px solid ${theme.border}`, paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <p className="text-xs font-mono" style={{ color: theme.muted }}>
           Manuel Cortez © {new Date().getFullYear()} · Monterrey, México

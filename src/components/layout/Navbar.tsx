@@ -91,6 +91,9 @@ export default function Navbar() {
           backdropFilter: scrolled || mobileOpen ? 'blur(24px)' : 'none',
           WebkitBackdropFilter: scrolled || mobileOpen ? 'blur(24px)' : 'none',
           borderColor: scrolled || mobileOpen ? 'var(--border)' : 'transparent',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingLeft: 'env(safe-area-inset-left, 0px)',
+          paddingRight: 'env(safe-area-inset-right, 0px)',
         }}
       >
         <div className="flex items-center justify-between px-6 md:px-10 h-16 max-w-[1280px] mx-auto">
@@ -147,7 +150,8 @@ export default function Navbar() {
           {/* Dropdown panel */}
           <div
             ref={dropdownRef}
-            className="absolute top-16 left-3 right-3 rounded-2xl overflow-hidden shadow-2xl"
+            className="absolute left-3 right-3 rounded-2xl overflow-hidden shadow-2xl"
+            style={{ top: 'calc(4rem + env(safe-area-inset-top, 0px))' }}
             style={{
               background: 'rgba(13,13,13,0.97)',
               backdropFilter: 'blur(30px)',

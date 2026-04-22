@@ -23,7 +23,7 @@ export default function Footer() {
   })
 
   return (
-    <footer className="relative bg-[var(--bg-base)]">
+    <footer className="relative bg-[var(--bg-base)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* Gradient accent line */}
       <div
         ref={borderRef}

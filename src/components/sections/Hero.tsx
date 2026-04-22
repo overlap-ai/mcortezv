@@ -208,7 +208,7 @@ export default function Hero({ canAnimate = false }: { canAnimate?: boolean }) {
       </div>
 
       {/* ── Scroll indicator (fades on scroll) — OUTSIDE hero-inner ── */}
-      <div className="hero-scroll absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
+      <div className="hero-scroll absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10" style={{ bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
         <span className="font-mono text-[0.6rem] text-[var(--text-disabled)] tracking-[0.2em] uppercase">scroll</span>
         <div className="w-px h-10 animate-scroll-bounce"
           style={{ background: 'linear-gradient(to bottom, var(--text-muted), transparent)' }}
