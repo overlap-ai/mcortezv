@@ -151,8 +151,8 @@ export default function Navbar() {
           <div
             ref={dropdownRef}
             className="absolute left-3 right-3 rounded-2xl overflow-hidden shadow-2xl"
-            style={{ top: 'calc(4rem + env(safe-area-inset-top, 0px))' }}
             style={{
+              top: 'calc(4rem + env(safe-area-inset-top, 0px))',
               background: 'rgba(13,13,13,0.97)',
               backdropFilter: 'blur(30px)',
               WebkitBackdropFilter: 'blur(30px)',
